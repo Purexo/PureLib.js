@@ -13,6 +13,8 @@ It's a repository with some javascript methods to help js developpement
   - return Element with a query string (jQuery style)
 - NodeList $$(string query)
   - return NodeList with a query string (jQuery style)
+- Promise getJSON(url)
+  - getJSON('http://example.com/something.json').then(json => { console.log(json) });
 - Array<Element> nodeTreeGenerator(Object data, Element __parent)
   - will create some DOM Elements and attach themselves 
   - `__parent` is optional, the DOMTreeElements will append to `__parent` if you set it
