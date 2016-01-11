@@ -1,7 +1,7 @@
 # PureLib.js
 It's a repository with some javascript methods to help js developpement
 
-Why PureLib.js ?
+## Why PureLib.js ?
 
 It's a contraction of Purexo and Library and .js because it's javascript :3
 
