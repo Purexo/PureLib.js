@@ -17,8 +17,12 @@ It's a contraction of Purexo and Library and .js because it's javascript :3
   - return Element with a query string (jQuery style)
 - NodeList $$(string query)
   - return NodeList with a query string (jQuery style)
-- Promise getJSON(url)
-  - `getJSON('http://example.com/something.json').then(json => { console.log(json) });`
+- void getJSON(String url, callback(Object json), String method, Object data)
+  - `getJSON('http://example.com/something.json', function(json) {console.log(json);});`
+- void getXML(url, callback(Object xml), String method, Object data)
+  - `getXML('http://example.com/something.xml', function(xml) {console.log(xml);});`
+- void getRAW(url, callback(String data), String method, Object data)
+  - `getRAW('http://example.com/something.txt', function(data) {console.log(data);});`
 - Array<Element> nodeTreeGenerator(Object data, Element __parent)
   - will create some DOM Elements and attach themselves 
   - `__parent` is optional, the DOMTreeElements will append to `__parent` if you set it
