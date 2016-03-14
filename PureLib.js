@@ -97,21 +97,65 @@ function nodeTreeGenerator(data, __parent) {
 }
 
 /**
-* http://stackoverflow.com/a/24587512
+* Author : Purexo
+* simply handle xhr request with json content
+* @param url : string, content url you want fetch
+* @param callback : function(result), your callback to handle result of your request
+* @param method : Optional, string, http method (GET POST PUT ...)
+* @param data : Optional, any, data you want give to the send (XMLHttpRequest.send) method
 */
-var getJSON = function(url) {
-  return new Promise(function(resolve, reject) {
+var getJSON = function(url, callback, method, data) {
     var xhr = new XMLHttpRequest();
-    xhr.open('get', url, true);
-    xhr.responseType = 'json';
-    xhr.onload = function() {
-      var status = xhr.status;
-      if (status == 200) {
-        resolve(xhr.response);
-      } else {
-        reject(status);
-      }
-    };
-    xhr.send();
-  });
-};
+    xhr.open(method ? method : 'get', url, true);
+
+    xhr.onreadystatechange = function (aEvt) {
+        if (xhr.readyState == 4) {
+          if (xhr.status == 200)
+            callback(JSON.parse(xhr.responseText));
+        }
+    }
+    
+    xhr.send(data ? data : null);
+}
+
+/**
+* Author : Purexo
+* simply handle xhr request with xml content
+* @param url : string, content url you want fetch
+* @param callback : function(result), your callback to handle result of your request
+* @param method : string, http method (GET POST PUT ...)
+* @param data : any, data you want give to the send (XMLHttpRequest.send) method
+*/
+function getXML(url, callback, method, data) {
+    var xhr = new XMLHttpRequest();
+    xhr.overrideMimeType('text/xml');
+    xhr.open(method ? method : 'GET', url, true);
+    xhr.onreadystatechange = function (aEvt) {
+        if (xhr.readyState == 4) {
+            if (xhr.status == 200)
+                callback(xhr.responseXML);
+        }
+    }
+    xhr.send(data ? data : null);
+}
+/**
+* Author : Purexo
+* simply handle xhr request with json content
+* @param url : string, content url you want fetch
+* @param callback : function(result), your callback to handle result of your request
+* @param method : Optional, string, http method (GET POST PUT ...)
+* @param data : Optional, any, data you want give to the send (XMLHttpRequest.send) method
+*/
+var getRAW = function(url, callback, method, data) {
+    var xhr = new XMLHttpRequest();
+    xhr.open(method ? method : 'get', url, true);
+
+    xhr.onreadystatechange = function (aEvt) {
+        if (xhr.readyState == 4) {
+          if (xhr.status == 200)
+            callback(xhr.responseText);
+        }
+    }
+    
+    xhr.send(data ? data : null);
+}
