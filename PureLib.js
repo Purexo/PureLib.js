@@ -1,4 +1,33 @@
 /**
+ * Itering on object or array.
+ * 
+ * Sample usage : 
+ * var tab = {0: 5, 'bip': 'bep', 54: 'bip', 'bep': 89]}
+ * foreach(tab, function(key, value) {
+ *    console.log(key, ': ', value)
+ * });
+ * // will print something like
+ * // 0: 5
+ * // bip: bep
+ * // 54: bip
+ * 
+ * @param data : Array | Object
+ * @param callback : function
+ * */
+function foreach (data, callback) {
+	var data_length = data.length;
+	if (data_length) {
+		for (var i = 0; i < data_length; i++) {
+			callback(i, data[i]);
+		}
+	} else {
+		for (var key in data) {
+			callback(key, data[key]);
+		}
+	}
+}
+
+/**
 * === Gestion DOM ===
 * @author : Taken from https://stackoverflow.com/questions/683366/remove-all-the-children-dom-elements-in-div
 * @param node : Dom Element where you want delete all children node
