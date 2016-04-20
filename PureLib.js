@@ -41,6 +41,7 @@ function removeAllChildren(node){
 /**
 * @author Purexo <contact@purexo.eu>
 * A selector System like jquery with native javascript
+* Short alias for document.querySelector and querySelectorAll
 * @param query : <string> It's the query string, same as CSS
 * usage :
 *   let nodes = $$('.test') return all elements who have class test atributes
@@ -52,7 +53,7 @@ function $$(query) { return document.querySelectorAll(query); }
 /**
 * @author : Purexo <contact@purexo.eu>
 * A NodeTreeGenerator
-* @param data : tab of object with (all optional) attributes :
+* @param data : Array : tab of object with (all optional) attributes :
 *   - tag : HTML tag : string => document.createElement(data.tag). (default = div)
 *   - attr : tab of object with attributes :
 *     - name : string
@@ -61,10 +62,10 @@ function $$(query) { return document.querySelectorAll(query); }
 *   - text : string. put un current node as textNode el.appendChild(document.createTextNode())
 *   - in : tab of object like data (Yeah It's recursive, obvious to make some tree)
 *
-* @param __parent : element : optional and usefull for recursion
+* @param __parent : Element : optional and usefull for recursion
 *   nodeTreeGenerator will attach your created DOM to __parent element
 *
-* @return elements : it's a tab with the generated nodes
+* @return elements : Array of generated nodes
 
   Example :
   var els = nodeTreeGenerator([
