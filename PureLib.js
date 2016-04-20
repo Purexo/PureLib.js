@@ -189,3 +189,46 @@ var getRAW = function(url, callback, method, data) {
     
     xhr.send(data ? data : null);
 }
+
+/**
+ * Binding of LocalStorage API for support of object (transform on JSON)
+ * look at https://developer.mozilla.org/en-US/docs/Web/API/Storage
+ */
+var LS = {
+    setItem: function(key, data) {
+        return localStorage.setItem(key, JSON.stringify(data));
+    },
+    getItem: function(key) {
+        return JSON.parse(localStorage.getItem(key));
+    },
+    removeItem: function(key) {
+        return localStorage.removeItem(key);
+    },
+    key: function(index) {
+        return localStorage.key(index);
+    },
+    clear: function() {
+        return localStorage.clear();
+    }
+};
+/**
+ * Binding of SessionStorage API for support of object (transform on JSON)
+ * look at https://developer.mozilla.org/en-US/docs/Web/API/Storage
+ */
+var SS = {
+    setItem: function(key, data) {
+        return sessionStorage.setItem(key, JSON.stringify(data));
+    },
+    getItem: function(key) {
+        return JSON.parse(sessionStorage.getItem(key));
+    },
+    removeItem: function(key) {
+        return sessionStorage.removeItem(key);
+    },
+    key: function(index) {
+        return sessionStorage.key(index);
+    },
+    clear: function() {
+        return sessionStorage.clear();
+    }
+};
