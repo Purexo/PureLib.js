@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: dom.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: dom.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * PureLib.js modular
+ * @namespace pl
+ */
+pl = pl || {};
+
+(function () {
+  // Polyfill
+  // https://developer.mozilla.org/fr/docs/Web/JavaScript/Reference/Objets_globaux/Array/isArray
+  if (!Array.isArray) {
+    Array.isArray = function (arg) {
+      return Object.prototype.toString.call(arg) === '[object Array]';
+    };
+  }
+
+  /**
+   * Get the first finded Element matched with selector or null if nothing match
+   * 
+   * @function $
+   * @memberof pl
+   * @param {string} selector - CSS selector
+   * @return {Element|null}
+   */
+  pl.$ = document.querySelector.bind(document);
+
+  /**
+   * Get all matching Element with selector in NodeList format if you need it for any reason
+   * 
+   * @function $$_
+   * @memberof pl
+   * @param {string} selector - CSS selector
+   * @return {NodeList}
+   */
+  pl.$$_ = document.querySelectorAll.bind(document);
+
+  /**
+   * Get all matching Element with selector in an Array (a bit less perfom), we can't call forEach on NodeList :(
+   * 
+   * @author Purexo &lt;contact@purexo.mom>
+   * @function $$
+   * @memberof pl
+   * @param {string} selector - CSS selector
+   * @return {Element[]} all matching Element with selector
+   */
+  pl.$$ = function (selector) {
+    var res = [];
+    var nl = document.querySelectorAll(selector);
+
+    // http://stackoverflow.com/a/15144269
+    // generate Array from NodeList
+    for (var i = -1, l = nl.length; ++i !== l; res[i] = nl[i]);
+
+    return res;
+  };
+
+  /**
+   * @namespace pl.exceptions
+   */
+  var exceptions = {
+    /**
+     * @author Purexo &lt;contact@purexo.mom>
+     * 
+     * @class pl.exceptions.NotArrayException
+     * @property {string} name - name of Exception
+     * @property {string} message - message of Exception
+     * @property {*} context - the incorrect object
+     * @param {string} message - message of Exception
+     * @param {*} context - the incorrect object
+     */
+    NotArrayException: function NotArrayException(message, context) {
+      this.name = 'NotArrayException';
+      this.message = message;
+      this.context = context;
+    },
+    /**
+     * @author Purexo &lt;contact@purexo.mom>
+     * 
+     * @class pl.exceptions.NotElementException
+     * @property {string} name - name of Exception
+     * @property {string} message - message of Exception
+     * @property {*} context - the incorrect object
+     * @param {string} message - message of Exception
+     * @param {*} context - the incorrect object
+     */
+    NotElementException: function NotElementException(message, context) {
+      this.name = 'NotElementException';
+      this.message = message;
+      this.context = context;
+    },
+    /**
+     * @author Purexo &lt;contact@purexo.mom>
+     * 
+     * @class pl.exceptions.NotStringException
+     * @property {string} name - name of Exception
+     * @property {string} message - message of Exception
+     * @property {*} context - the incorrect object
+     * @param {string} message - message of Exception
+     * @param {*} context - the incorrect object
+     */
+    NotStringException: function NotStringException(message, context) {
+      this.name = 'NotStringException';
+      this.message = message;
+      this.context = context;
+    }
+  };
+  pl.exceptions = pl.exceptions || {};
+  Object.assign(pl.exceptions, exceptions);
+
+  /**
+   * Attribute is a property of NodeTree to set attribute to the tag
+   * @see NodeTree
+   * 
+   * @author Purexo &lt;contact@purexo.mom>
+   * 
+   * @typedef {Object} Attribute
+   * @property {string} name
+   * @property {string} value
+   * 
+   * @example 
+   * {name: 'foo', value: 'bar'} -> &lt;tag foo="bar">
+   */
+
+  /**
+   * NodeTree is an Object with some property for generating properly an Element
+   * 
+   * @author Purexo &lt;contact@purexo.mom>
+   * 
+   * @typedef {Object} NodeTree
+   * @property {string} [tag=div] - a valid DOM tag name
+   * @property {string} [text] - text string to insert in your tag
+   * @property {Attribute[]} [attr] - text string to insert in your tag
+   * @property {NodeTree} [in] - recursive structure (obvious for a tree generator isn't it ?)
+   * 
+   * @example 
+   * {} -> &lt;div>&lt;/div>
+   * 
+   * {
+   *  tag: 'p',
+   *  text: 'Hello World',
+   *  attr: [
+   *    {name: 'className', value: 'foo bar'},
+   *    {name: 'data-foo', value: 'bar'}
+   *  ],
+   *  in: [
+   *    {},
+   *    {
+   *      tag: p,
+   *      text: 'Inner Hello World'
+   *    }
+   *  ]
+   * } -->
+   * &lt;p class="foo bar" data-foo="bar">
+   *  Hello World&lt;div>&lt;/div>
+   *  &lt;p>Inner Hello World&lt;/p>
+   * &lt;/p>
+   */
+
+  /**
+   * Will generate some DOM and eventually apend to an Element
+   * 
+   * @author Purexo &lt;contact@purexo.mom>
+   * 
+   * @function nodeTreeGenerator
+   * @memberof pl
+   * @param {NodeTree[]} nodeTreeArray - Array of NodeTree
+   * @see NodeTree
+   * @param {Element} [__parent] - if precise, each NodeTree of nodeTreeArray will be appended to him
+   * @returns {Element[]}
+   * @throws {pl.exceptions.NotArrayException|pl.exceptions.NotStringException|pl.exceptions.NotElementException}
+   * 
+   * @example 
+   * pl.nodeTreeGenerator([{}])
+   *  // return [&lt;div>&lt;/div>]
+   * 
+   * pl.nodeTreeGenerator([{
+   *  tag: 'p',
+   *  text: 'Hello World',
+   *  attr: [
+   *    {name: 'className', value: 'foo bar'},
+   *    {name: 'data-foo', value: 'bar'}
+   *  ],
+   *  in: [
+   *    {},
+   *    {
+   *      tag: span,
+   *      text: 'Inner Hello World'
+   *    }
+   *  ]
+   * }], pl.$('#test'))
+   * 
+   * // return
+   * // &lt;p class="foo bar" data-foo="bar">
+   * //   Hello World
+   * //   &lt;div>&lt;/div>
+   * //   &lt;span>Inner Hello World&lt;/span>
+   * // &lt;/p>
+   * 
+   * // will update Element with id test
+   * // &lt;div id="test">
+   * //   &lt;\!-- already present content -->
+   * //   &lt;p class="foo bar" data-foo="bar">
+   * //     Hello World
+   * //     &lt;div>&lt;/div>
+   * //     &lt;span>Inner Hello World&lt;/span>
+   * //   &lt;/p>
+   * // &lt;/div>
+   */
+  pl.nodeTreeGenerator = function nodeTreeGenerator(nodeTreeArray, __parent) {
+    if (!Array.isArray(nodeTreeArray)) {
+      throw new pl.exceptions.NotArrayException(undefined, nodeTreeArray);
+    }
+
+    var node_tree_length = nodeTreeArray.length;
+    var elements = [];
+    for (var i = 0; i &lt; node_tree_length; i++) {
+      var item = nodeTreeArray[i];
+      if (!item.tag) item.tag = 'div';
+      var element = document.createElement(item.tag);
+
+      if (item.attr) {
+        if (!Array.isArray(item.attr)) {
+          throw new pl.exceptions.NotArrayException(undefined, item.attr);
+        }
+
+        var attr_length = item.attr.length;
+        for (var j = 0; j &lt; attr_length; j++) {
+          var attr = item.attr[j];
+          if (attr.name != 'className') {
+            element.setAttribute(attr.name, attr - value);
+          }
+          element[attr.name] = attr.value;
+        }
+      }
+
+      if (item.text) {
+        if (typeof item.text != 'string') {
+          throw new pl.exceptions.NotStringException(undefined, item.text);
+        }
+
+        var nodeText = document.createTextNode(item.text)
+        element.appendChild(nodeText);
+      }
+
+      if (item.in) {
+        if (!Array.isArray(item.in)) {
+          throw new pl.exceptions.NotArrayException(undefined, item.in);
+        }
+
+        nodeTreeGenerator(item.in, element);
+      }
+
+      if (__parent) {
+        if (!(__parent instanceof Element)) {
+          throw new pl.exceptions.NotElementException(undefined, __parent)
+        }
+
+        __parent.appendChild(element)
+      }
+
+      elements[i] = element;
+    }
+
+    return elements
+  }
+})();</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="pl.exceptions.NotArrayException.html">NotArrayException</a></li><li><a href="pl.exceptions.NotElementException.html">NotElementException</a></li><li><a href="pl.exceptions.NotFunctionException.html">NotFunctionException</a></li><li><a href="pl.exceptions.NotNullException.html">NotNullException</a></li><li><a href="pl.exceptions.NotStringException.html">NotStringException</a></li></ul><h3>Namespaces</h3><ul><li><a href="pl.html">pl</a></li><li><a href="pl.exceptions.html">exceptions</a></li></ul><h3><a href="global.html">Global</a></h3>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a> on Sat Aug 06 2016 01:14:01 GMT+0200 (Paris, Madrid (heure d’été))
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
