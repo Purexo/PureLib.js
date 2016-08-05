@@ -1,8 +1,8 @@
 'use strict';
+
 /*
  * In this file you'll find some utils for ES6 compatible navigators
  */
-
 
 /**
  * asyncEach callback
