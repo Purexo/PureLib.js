@@ -91,7 +91,7 @@
    * @throws {pl.Exception.NotIterableException}
    */
   pl.PromiseWaitAll = function PromiseWaitAll(promises) {
-    if (!Array.isArray(promises)) {
+    if (typeof iterable[Symbol.iterator] !== 'function') {
       throw new pl.Exception.NotIterableException('promises should be an Iterable of Promise')
     }
 
