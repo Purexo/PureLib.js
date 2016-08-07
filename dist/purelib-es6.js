@@ -129,22 +129,27 @@
       }
       const binding = bind || iterable;
       callback = callback.bind(binding);
-      for (let [key, value] of iterable.entries()) {
+      for (let [key, value] of iterable) {
         callback(value, key, iterable);
       }
       resolve(iterable);
     });
   }
+  pl.Exception.NotIterableException =
+    function NotIterableException(message, context) {
+      Exception.prototype.constructor.call(this, 'NotIterableException', message, context);
+    }
+  inherit(pl.Exception, pl.Exception.NotIterableException);
   pl.PromiseWaitAll = function PromiseWaitAll(promises) {
     if (!Array.isArray(promises)) {
-      throw new pl.Exception.NotArrayException('promises should be an Array of Promise')
+      throw new pl.Exception.NotIterableException('promises should be an Iterable of Promise')
     }
     return new Promise(function (resolve, reject) {
       let count = promises.length;
-      let results = [];
-      promises.forEach((promise, index, array) => {
+      let results = new Map();
+      for (let [index, promise] of promises) {
         let handler = data => {
-          results[index] = data;
+          results.set(index, data);
           if (--count == 0) {
             resolve(results);
           }
@@ -155,7 +160,7 @@
         } else {
           handler(promise);
         }
-      })
+      }
     });
   }
 })();

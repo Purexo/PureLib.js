@@ -44,7 +44,7 @@
       callback = callback.bind(binding);
 
       // iterate over iterable
-      for (let [key, value] of iterable.entries()) {
+      for (let [key, value] of iterable) {
         callback(value, key, iterable);
       }
 
@@ -52,6 +52,23 @@
       resolve(iterable);
     });
   }
+
+  /**
+   * @author Purexo <contact@purexo.mom>
+   * 
+   * @class pl.Exception.NotIterableException
+   * @memberof pl.Exception
+   * @static
+   * @augments pl.Exception
+   * 
+   * @param {string} message - message of Exception
+   * @param {*} context - the incorrect object
+   */
+  pl.Exception.NotIterableException =
+    function NotIterableException(message, context) {
+      Exception.prototype.constructor.call(this, 'NotIterableException', message, context);
+    }
+  inherit(pl.Exception, pl.Exception.NotIterableException);
 
   /**
    * @typedef {Promise} Promise
@@ -68,22 +85,24 @@
    * @author Purexo <contact@purexo.mom>
    * @author ZatsuneNoMoku https://github.com/ZatsuneNoMokou
    * 
-   * @param {Promise[]} promises - Array of Promise you want wait resolve
-   * @returns {Promise} - .then of this Promise give an array with each data given by each Promise of promises (same ordered)
-   * @throws {pl.Exception.NotArrayException}
+   * @param {Object} promises - an Iterable of Promise you want wait resolve
+   * @param {function} promises[Symbol.iterator]
+   * @returns {Promise} .then of this Promise give a Map with each data given by each Promise of promises (same index)
+   * @throws {pl.Exception.NotIterableException}
    */
   pl.PromiseWaitAll = function PromiseWaitAll(promises) {
     if (!Array.isArray(promises)) {
-      throw new pl.Exception.NotArrayException('promises should be an Array of Promise')
+      throw new pl.Exception.NotIterableException('promises should be an Iterable of Promise')
     }
 
     return new Promise(function (resolve, reject) {
       let count = promises.length;
-      let results = [];
+      let results = new Map();
 
-      promises.forEach((promise, index, array) => {
+      // iterate over iterable
+      for (let [index, promise] of promises) {
         let handler = data => {
-          results[index] = data;
+          results.set(index, data);
           if (--count == 0) {
             resolve(results);
           }
@@ -95,7 +114,7 @@
         } else {
           handler(promise);
         }
-      })
+      }
     });
   }
 
