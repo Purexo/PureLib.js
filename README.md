@@ -1,48 +1,58 @@
 # PureLib.js
-It's a repository with some javascript methods to help js developpement
+It's a library with some javascript methods to help js developpement and DOM manipulation
 
 ## Why PureLib.js ?
 
-It's a contraction of Purexo and Library and .js because it's javascript :3
+It's a contraction of Purexo, Library and .js because it's javascript :3
 
 ## Import
 
 ```html
-<script type="text/javascript" src="https://raw.githubusercontent.com/purexo/PureLib.js/master/PureLib.js"></script>
+// recommanded
+<script type="text/javascript" src="https://raw.githubusercontent.com/purexo/PureLib.js/master/dist/purelib-es5.min.js"></script>
+or
+
+// just if you want core and es6 components - need a really recent and modern browser (like Firefox)
+<script type="text/javascript" src="https://raw.githubusercontent.com/purexo/PureLib.js/master/dist/purelib-es6.min.js"></script> 
+or
+
+// core + es5 + es6  - need a really recent and modern browser (like Firefox)
+<script type="text/javascript" src="https://raw.githubusercontent.com/purexo/PureLib.js/master/dist/purelib-full.min.js"></script>
 ```
 
-## Include (Typescript Style)
-- foreach(data : Array | Object, callback(key : any, value : any))
-- removeAllChildren(node : Element)
-- $(query : String) : Element
-  - return Element with a query string (jQuery style)
-- $$(query : String) : Array<Element>
-  - return NodeList with a query string (jQuery style)
-- getJSON(url : String, callback(json : Object), method ? : String, data ? : Object)
-  - `getJSON('http://example.com/something.json', function(json) {console.log(json);});`
-- getXML(url : String, callback(xml : Object), method ? : String, data ? : Object)
-  - `getXML('http://example.com/something.xml', function(xml) {console.log(xml);});`
-- getRAW(url : String, callback(data : String), method : String, data : Object)
-  - `getRAW('http://example.com/something.txt', function(data) {console.log(data);});`
-- Array<Element> nodeTreeGenerator(data : Object, __parent : Element)
-  - will create some DOM Elements and attach themselves 
-  - `__parent` is optional, the DOMTreeElements will append to `__parent` if you set it
+## What's in it ?
 
-```javascript
-data : {
-  tag : ? string, // (It's the tagName, default 'div')
-  attr : ? Array<{
-    name : string, // (It's an Attribute Name, like className)
-    value : string | any // ( It's what you put in your attribute, like 'member')
-  }>,
-  text : ? string, // (If you wan't put some text in your Element)
-  in :  ? Array<Object data>
-}
-```
+### Core (in ES5 for compatibility)
+- `pl` function (a wrapper like jQuery) return generally a Collection - http://purexo.github.io/PureLib.js/global.html#plfunction
+- `pl.Collection` Object extend Array - http://purexo.github.io/PureLib.js/pl.Collection.html
+- `pl.fn` shortcut for pl.Collection.prototype (for append some functionnality) - http://purexo.github.io/PureLib.js/pl.fn.html
+- `pl.Exception` Some Exceptions (you should handle or throws) - http://purexo.github.io/PureLib.js/pl.Exception.html
 
-And binding of localStorage and sessionStorage API with support of object storage (with JSON conversion) :
-- LS for LocalStorage
-- SS for SessionStorage
+### es5
+#### DOM
+- `pl.flush` function - Remove all children's Element contain in a Collection - http://purexo.github.io/PureLib.js/pl.html#.flush
+- `pl.fn.flush` children's Element contain in a current Collection - http://purexo.github.io/PureLib.js/pl.fn.html#~flush
+- `pl.fn.append` - http://purexo.github.io/PureLib.js/pl.fn.html#~append
+- `pl.fn.appendTo` - http://purexo.github.io/PureLib.js/pl.fn.html#~appendTo
+- `pl.generate` - http://purexo.github.io/PureLib.js/pl.html#.generate
+
+#### XHR
+- `pl.getJSON` - http://purexo.github.io/PureLib.js/pl.html#.getJSON
+- `pl.getXML` - http://purexo.github.io/PureLib.js/pl.html#.getXML
+- `pl.getRAW` - http://purexo.github.io/PureLib.js/pl.html#.getRAW
+
+#### utils
+- `pl.each` - http://purexo.github.io/PureLib.js/pl.html#.each
+- `pl.reMap` - http://purexo.github.io/PureLib.js/pl.html#.reMap
+- `pl.map` - http://purexo.github.io/PureLib.js/pl.html#.map
+
+#### storage
+- `pl.LS` - Binding of LocalStorage API with ability to store any content (JSON encoded) - http://purexo.github.io/PureLib.js/pl.LS.html
+- `pl.SS` - Binding of SessionStorage API with ability to store any content (JSON encoded) - http://purexo.github.io/PureLib.js/pl.SS.html
+
+### ES6
+#### utils
+- `pl.asyncEach` - http://purexo.github.io/PureLib.js/pl.html#.asyncEach
 
 ## For more info
-Look in [PureLib.js](https://github.com/purexo/PureLib.js/blob/master/PureLib.js) file and read commentary
+Look in [sources](https://github.com/purexo/PureLib.js/blob/master/PureLib.js/src) files and read commentary
