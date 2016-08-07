@@ -53,5 +53,50 @@
     });
   }
 
+  /**
+   * @typedef {Promise} Promise
+   * @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise
+   */
+
+  /**
+   * Work like Promise.all but without fail-fast behaviour and just accept an Array on Promise
+   * @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/all
+   * 
+   * @function PromiseWaitAll
+   * @memberof pl
+   * @static
+   * @author Purexo <contact@purexo.mom>
+   * @author ZatsuneNoMoku https://github.com/ZatsuneNoMokou
+   * 
+   * @param {Promise[]} promises - Array of Promise you want wait resolve
+   * @returns {Promise} - .then of this Promise give an array with each data given by each Promise of promises (same ordered)
+   * @throws {pl.Exception.NotArrayException}
+   */
+  pl.PromiseWaitAll = function PromiseWaitAll(promises) {
+    if (!Array.isArray(promises)) {
+      throw new pl.Exception.NotArrayException('promises should be an Array of Promise')
+    }
+
+    return new Promise(function (resolve, reject) {
+      let count = promises.length;
+      let results = [];
+
+      promises.forEach((promise, index, array) => {
+        let handler = data => {
+          results[index] = data;
+          if (--count == 0) {
+            resolve(results);
+          }
+        }
+
+        if (promise instanceof Promise) {
+          promise.then(handler);
+          promise.catch(handler);
+        } else {
+          handler(promise);
+        }
+      })
+    });
+  }
 
 })();

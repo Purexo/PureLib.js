@@ -135,4 +135,27 @@
       resolve(iterable);
     });
   }
+  pl.PromiseWaitAll = function PromiseWaitAll(promises) {
+    if (!Array.isArray(promises)) {
+      throw new pl.Exception.NotArrayException('promises should be an Array of Promise')
+    }
+    return new Promise(function (resolve, reject) {
+      let count = promises.length;
+      let results = [];
+      promises.forEach((promise, index, array) => {
+        let handler = data => {
+          results[index] = data;
+          if (--count == 0) {
+            resolve(results);
+          }
+        }
+        if (promise instanceof Promise) {
+          promise.then(handler);
+          promise.catch(handler);
+        } else {
+          handler(promise);
+        }
+      })
+    });
+  }
 })();
