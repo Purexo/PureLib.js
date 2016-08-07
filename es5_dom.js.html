@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: es5/dom.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: es5/dom.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>(function () {
+
+  /* test */ 
+
+  /**
+   * Flush all children's Element of the Collection
+   * @see https://stackoverflow.com/questions/683366/remove-all-the-children-dom-elements-in-div (inspired from)
+   * 
+   * @author Purexo &lt;contact@purexo.mom>
+   * @function flush
+   * @memberof pl
+   * @static
+   * @param {Collection} collection - collection (from pl())
+   */
+  pl.flush = function flush(collection) {
+    if (!(collection instanceof pl.Collection)) {
+      throw new pl.Exception.NotCollectionException('collection should be an Collection', collection);
+    }
+
+    collection.flush();
+  };
+
+  /**
+   * Flush all children of Element in this Collection
+   * @function flush
+   * @memberof pl.fn
+   * @inner
+   * @this Collection
+   */
+  pl.fn.flush = function flush() {
+    this.forEach(function (element) {
+      while (element.hasChildNodes()) {
+        element.removeChild(element.lastChild);
+      }
+    });
+  }
+
+  /**
+   * Append each Element of collection to Each Element of this
+   * @function append
+   * @memberof pl.fn
+   * @inner
+   * @param {Collection} collection
+   * @this Collection
+   */
+  pl.fn.append = function collectionAppend(collection) {
+    this.forEach(function (parent) {
+      collection.forEach(function (element) {
+        parent.appendChild(element);
+      });
+    });
+  }
+
+  /**
+   * Append each Element of this to Each Element of collection
+   * @function append
+   * @memberof pl.fn
+   * @inner
+   * @param {Collection} collection
+   * @this Collection
+   */
+  pl.fn.appendTo = function collectionAppendTo(collection) {
+    this.forEach(function (element) {
+      collection.forEach(function (parent) {
+        parent.appendChild(element);
+      });
+    });
+  }
+
+  /**
+   * Attribute is a property of NodeTree to set attribute to the tag
+   * @see NodeTree
+   * 
+   * @author Purexo &lt;contact@purexo.mom>
+   * 
+   * @typedef {Object} Attribute
+   * @property {string} name
+   * @property {string} value
+   * 
+   * @example 
+   * {name: 'foo', value: 'bar'} -> &lt;tag foo="bar">
+   */
+
+  /**
+   * NodeTree is an Object with some property for generating properly an Element
+   * 
+   * @author Purexo &lt;contact@purexo.mom>
+   * 
+   * @typedef {Object} NodeTree
+   * @property {string} [tag=div] - a valid DOM tag name
+   * @property {string} [text] - text string to insert in your tag
+   * @property {Attribute[]} [attr] - text string to insert in your tag
+   * @property {NodeTree} [in] - recursive structure (obvious for a tree generator isn't it ?)
+   * 
+   * @example 
+   * {} -> &lt;div>&lt;/div>
+   * 
+   * {
+   *  tag: 'p',
+   *  text: 'Hello World',
+   *  attr: [
+   *    {name: 'className', value: 'foo bar'},
+   *    {name: 'data-foo', value: 'bar'}
+   *  ],
+   *  in: [
+   *    {},
+   *    {
+   *      tag: p,
+   *      text: 'Inner Hello World'
+   *    }
+   *  ]
+   * } -->
+   * &lt;p class="foo bar" data-foo="bar">
+   *  Hello World&lt;div>&lt;/div>
+   *  &lt;p>Inner Hello World&lt;/p>
+   * &lt;/p>
+   */
+
+  /**
+   * Will generate some DOM and eventually apend to an Element
+   * 
+   * @author Purexo &lt;contact@purexo.mom>
+   * 
+   * @function generate
+   * @memberof pl
+   * @param {NodeTree[]} nodeTreeArray - Array of NodeTree
+   * @see NodeTree
+   * @param {Collection} [__parent] - if precise, each NodeTree of nodeTreeArray will be appended to him
+   * @returns {Collection}
+   * @throws {pl.Exception.NotArrayException|pl.Exception.NotStringException|pl.Exception.NotElementException}
+   * 
+   * @example 
+   * pl.generate([{}])
+   *  // return [&lt;div>&lt;/div>]
+   * 
+   * pl.generate([{
+   *  tag: 'p',
+   *  text: 'Hello World',
+   *  attr: [
+   *    {name: 'className', value: 'foo bar'},
+   *    {name: 'data-foo', value: 'bar'}
+   *  ],
+   *  in: [
+   *    {},
+   *    {
+   *      tag: span,
+   *      text: 'Inner Hello World'
+   *    }
+   *  ]
+   * }], pl('#test'))
+   * 
+   * // return
+   * // &lt;p class="foo bar" data-foo="bar">
+   * //   Hello World
+   * //   &lt;div>&lt;/div>
+   * //   &lt;span>Inner Hello World&lt;/span>
+   * // &lt;/p>
+   * 
+   * // will update Element with id test
+   * // &lt;div id="test">
+   * //   &lt;\!-- already present content -->
+   * //   &lt;p class="foo bar" data-foo="bar">
+   * //     Hello World
+   * //     &lt;div>&lt;/div>
+   * //     &lt;span>Inner Hello World&lt;/span>
+   * //   &lt;/p>
+   * // &lt;/div>
+   */
+  function nodeTreeGenerator(nodeTreeArray, __parent) {
+    if (!Array.isArray(nodeTreeArray)) {
+      throw new pl.Exception.NotArrayException('you should put your NodeTree in an Array', nodeTreeArray);
+    }
+
+    var node_tree_length = nodeTreeArray.length;
+    var elements = new pl.Collection();
+    for (var i = 0; i &lt; node_tree_length; i++) {
+      var item = nodeTreeArray[i];
+      if (!item.tag) item.tag = 'div';
+      var element = document.createElement(item.tag);
+
+      if (item.attr) {
+        if (!Array.isArray(item.attr)) {
+          throw new pl.Exception.NotArrayException(undefined, item.attr);
+        }
+
+        var attr_length = item.attr.length;
+        for (var j = 0; j &lt; attr_length; j++) {
+          var attr = item.attr[j];
+          if (attr.name != 'className') {
+            element.setAttribute(attr.name, attr - value);
+          }
+          element[attr.name] = attr.value;
+        }
+      }
+
+      if (item.text) {
+        if (typeof item.text != 'string') {
+          throw new pl.Exception.NotStringException(undefined, item.text);
+        }
+
+        var nodeText = document.createTextNode(item.text);
+        element.appendChild(nodeText);
+      }
+
+      if (item.in) {
+        if (!Array.isArray(item.in)) {
+          throw new pl.Exception.NotArrayException(undefined, item.in);
+        }
+
+        nodeTreeGenerator(item.in, element);
+      }
+
+      if (__parent) {
+        if (!(__parent instanceof Collection)) {
+          throw new pl.Exception.NotCollectionException(undefined, __parent);
+        }
+
+        __parent.append(element);
+      }
+
+      elements[i] = element;
+    }
+
+    return elements;
+  }
+  pl.generate = nodeTreeGenerator;
+})();</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="pl.Collection.html">Collection</a></li><li><a href="pl.Exception.html">Exception</a></li><li><a href="pl.Exception.InvalidArgumentsException.html">InvalidArgumentsException</a></li><li><a href="pl.Exception.NotArrayException.html">NotArrayException</a></li><li><a href="pl.Exception.NotCollectionException.html">NotCollectionException</a></li><li><a href="pl.Exception.NotElementException.html">NotElementException</a></li><li><a href="pl.Exception.NotFunctionException.html">NotFunctionException</a></li><li><a href="pl.Exception.NotNullException.html">NotNullException</a></li><li><a href="pl.Exception.NotStringException.html">NotStringException</a></li></ul><h3>Namespaces</h3><ul><li><a href="pl.html">pl</a></li><li><a href="pl.fn.html">fn</a></li><li><a href="pl.LS.html">LS</a></li><li><a href="pl.SS.html">SS</a></li><li><a href="pl.xhr.html">xhr</a></li></ul><h3>Global</h3><ul><li><a href="global.html#plfunction">pl</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a> on Sun Aug 07 2016 20:07:41 GMT+0200 (DST)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
