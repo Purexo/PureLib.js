@@ -141,11 +141,11 @@
     }
   inherit(pl.Exception, pl.Exception.NotIterableException);
   pl.PromiseWaitAll = function PromiseWaitAll(promises) {
-    if (typeof iterable[Symbol.iterator] !== 'function') {
+    if (typeof promises[Symbol.iterator] !== 'function') {
       throw new pl.Exception.NotIterableException('promises should be an Iterable of Promise')
     }
     return new Promise(function (resolve, reject) {
-      let count = promises.length;
+      let count = typeof promise.size == 'function' ? promises.size() : promise.length;
       let results = new Map();
       for (let [index, promise] of promises) {
         let handler = data => {
