@@ -1,110 +1,71 @@
-/**
- * PureLib.js modular
- * @namespace pl
- */
-pl = pl || {};
-
 (function () {
-  // Polyfill
-  // https://developer.mozilla.org/fr/docs/Web/JavaScript/Reference/Objets_globaux/Array/isArray
-  if (!Array.isArray) {
-    Array.isArray = function (arg) {
-      return Object.prototype.toString.call(arg) === '[object Array]';
-    };
+
+  /* test */ 
+
+  /**
+   * Flush all children's Element of the Collection
+   * @see https://stackoverflow.com/questions/683366/remove-all-the-children-dom-elements-in-div (inspired from)
+   * 
+   * @author Purexo <contact@purexo.mom>
+   * @function flush
+   * @memberof pl
+   * @static
+   * @param {Collection} collection - collection (from pl())
+   */
+  pl.flush = function flush(collection) {
+    if (!(collection instanceof pl.Collection)) {
+      throw new pl.Exception.NotCollectionException('collection should be an Collection', collection);
+    }
+
+    collection.flush();
+  };
+
+  /**
+   * Flush all children of Element in this Collection
+   * @function flush
+   * @memberof pl.fn
+   * @inner
+   * @this Collection
+   */
+  pl.fn.flush = function flush() {
+    this.forEach(function (element) {
+      while (element.hasChildNodes()) {
+        element.removeChild(element.lastChild);
+      }
+    });
   }
 
   /**
-   * Get the first finded Element matched with selector or null if nothing match
-   * 
-   * @function $
-   * @memberof pl
-   * @param {string} selector - CSS selector
-   * @return {Element|null}
+   * Append each Element of collection to Each Element of this
+   * @function append
+   * @memberof pl.fn
+   * @inner
+   * @param {Collection} collection
+   * @this Collection
    */
-  pl.$ = document.querySelector.bind(document);
+  pl.fn.append = function collectionAppend(collection) {
+    this.forEach(function (parent) {
+      collection.forEach(function (element) {
+        parent.appendChild(element);
+      });
+    });
+  }
 
   /**
-   * Get all matching Element with selector in NodeList format if you need it for any reason
-   * 
-   * @function $$_
-   * @memberof pl
-   * @param {string} selector - CSS selector
-   * @return {NodeList}
+   * Append each Element of this to Each Element of collection
+   * @function append
+   * @memberof pl.fn
+   * @inner
+   * @param {Collection} collection
+   * @this Collection
    */
-  pl.$$_ = document.querySelectorAll.bind(document);
-
-  /**
-   * Get all matching Element with selector in an Array (a bit less perfom), we can't call forEach on NodeList :(
-   * 
-   * @author Purexo <contact@purexo.mom>
-   * @function $$
-   * @memberof pl
-   * @param {string} selector - CSS selector
-   * @return {Element[]} all matching Element with selector
-   */
-  pl.$$ = function (selector) {
-    var res = [];
-    var nl = document.querySelectorAll(selector);
-
-    // http://stackoverflow.com/a/15144269
-    // generate Array from NodeList
-    for (var i = -1, l = nl.length; ++i !== l; res[i] = nl[i]);
-
-    return res;
-  };
-
-  /**
-   * @namespace pl.exceptions
-   */
-  var exceptions = {
-    /**
-     * @author Purexo <contact@purexo.mom>
-     * 
-     * @class pl.exceptions.NotArrayException
-     * @property {string} name - name of Exception
-     * @property {string} message - message of Exception
-     * @property {*} context - the incorrect object
-     * @param {string} message - message of Exception
-     * @param {*} context - the incorrect object
-     */
-    NotArrayException: function NotArrayException(message, context) {
-      this.name = 'NotArrayException';
-      this.message = message;
-      this.context = context;
-    },
-    /**
-     * @author Purexo <contact@purexo.mom>
-     * 
-     * @class pl.exceptions.NotElementException
-     * @property {string} name - name of Exception
-     * @property {string} message - message of Exception
-     * @property {*} context - the incorrect object
-     * @param {string} message - message of Exception
-     * @param {*} context - the incorrect object
-     */
-    NotElementException: function NotElementException(message, context) {
-      this.name = 'NotElementException';
-      this.message = message;
-      this.context = context;
-    },
-    /**
-     * @author Purexo <contact@purexo.mom>
-     * 
-     * @class pl.exceptions.NotStringException
-     * @property {string} name - name of Exception
-     * @property {string} message - message of Exception
-     * @property {*} context - the incorrect object
-     * @param {string} message - message of Exception
-     * @param {*} context - the incorrect object
-     */
-    NotStringException: function NotStringException(message, context) {
-      this.name = 'NotStringException';
-      this.message = message;
-      this.context = context;
-    }
-  };
-  pl.exceptions = pl.exceptions || {};
-  Object.assign(pl.exceptions, exceptions);
+  pl.fn.appendTo = function collectionAppendTo(collection) {
+    this.forEach(function (element) {
+      collection.forEach(function (parent) {
+        parent.appendChild(element);
+      });
+    });
+  }
 
   /**
    * Attribute is a property of NodeTree to set attribute to the tag
@@ -160,19 +121,19 @@ pl = pl || {};
    * 
    * @author Purexo <contact@purexo.mom>
    * 
-   * @function nodeTreeGenerator
+   * @function generate
    * @memberof pl
    * @param {NodeTree[]} nodeTreeArray - Array of NodeTree
    * @see NodeTree
-   * @param {Element} [__parent] - if precise, each NodeTree of nodeTreeArray will be appended to him
-   * @returns {Element[]}
-   * @throws {pl.exceptions.NotArrayException|pl.exceptions.NotStringException|pl.exceptions.NotElementException}
+   * @param {Collection} [__parent] - if precise, each NodeTree of nodeTreeArray will be appended to him
+   * @returns {Collection}
+   * @throws {pl.Exception.NotArrayException|pl.Exception.NotStringException|pl.Exception.NotElementException}
    * 
    * @example 
-   * pl.nodeTreeGenerator([{}])
+   * pl.generate([{}])
    *  // return [<div></div>]
    * 
-   * pl.nodeTreeGenerator([{
+   * pl.generate([{
    *  tag: 'p',
    *  text: 'Hello World',
    *  attr: [
@@ -186,7 +147,7 @@ pl = pl || {};
    *      text: 'Inner Hello World'
    *    }
    *  ]
-   * }], pl.$('#test'))
+   * }], pl('#test'))
    * 
    * // return
    * // <p class="foo bar" data-foo="bar">
@@ -205,13 +166,13 @@ pl = pl || {};
    * //   </p>
    * // </div>
    */
-  pl.nodeTreeGenerator = function nodeTreeGenerator(nodeTreeArray, __parent) {
+  function nodeTreeGenerator(nodeTreeArray, __parent) {
     if (!Array.isArray(nodeTreeArray)) {
-      throw new pl.exceptions.NotArrayException(undefined, nodeTreeArray);
+      throw new pl.Exception.NotArrayException('you should put your NodeTree in an Array', nodeTreeArray);
     }
 
     var node_tree_length = nodeTreeArray.length;
-    var elements = [];
+    var elements = new pl.Collection();
     for (var i = 0; i < node_tree_length; i++) {
       var item = nodeTreeArray[i];
       if (!item.tag) item.tag = 'div';
@@ -219,7 +180,7 @@ pl = pl || {};
 
       if (item.attr) {
         if (!Array.isArray(item.attr)) {
-          throw new pl.exceptions.NotArrayException(undefined, item.attr);
+          throw new pl.Exception.NotArrayException(undefined, item.attr);
         }
 
         var attr_length = item.attr.length;
@@ -234,32 +195,33 @@ pl = pl || {};
 
       if (item.text) {
         if (typeof item.text != 'string') {
-          throw new pl.exceptions.NotStringException(undefined, item.text);
+          throw new pl.Exception.NotStringException(undefined, item.text);
         }
 
-        var nodeText = document.createTextNode(item.text)
+        var nodeText = document.createTextNode(item.text);
         element.appendChild(nodeText);
       }
 
       if (item.in) {
         if (!Array.isArray(item.in)) {
-          throw new pl.exceptions.NotArrayException(undefined, item.in);
+          throw new pl.Exception.NotArrayException(undefined, item.in);
         }
 
         nodeTreeGenerator(item.in, element);
       }
 
       if (__parent) {
-        if (!(__parent instanceof Element)) {
-          throw new pl.exceptions.NotElementException(undefined, __parent)
+        if (!(__parent instanceof Collection)) {
+          throw new pl.Exception.NotCollectionException(undefined, __parent);
         }
 
-        __parent.appendChild(element)
+        __parent.append(element);
       }
 
       elements[i] = element;
     }
 
-    return elements
+    return elements;
   }
+  pl.generate = nodeTreeGenerator;
 })();
