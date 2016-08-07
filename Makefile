@@ -75,4 +75,6 @@ install-dependencies:
 	sudo npm install -g jsdoc mishoo/UglifyJS2#harmony
 
 doc:
-	jsdoc -r -d ${DOC_FOLDER}
+	jsdoc -r ${SRC_FOLDER} -d ${DOC_FOLDER}
+
+.PHONY: build build-full build-es6 build-es5 doc install-dependencies
