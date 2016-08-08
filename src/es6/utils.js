@@ -96,11 +96,13 @@
     }
 
     return new Promise(function (resolve, reject) {
-      let count = typeof promise.size == 'function' ? promises.size() : promise.length;
+      let count = typeof promises.size == 'function' ? promises.size() : promises.length;
       let results = new Map();
 
       // iterate over iterable
-      for (let [index, promise] of promises) {
+      // array not work with [index, value] array.entries() did
+      var iterator = typeof promises.entries == 'function' ? promises.entries() : promises;
+      for (let [index, promise] of iterator) {
         let handler = data => {
           results.set(index, data);
           if (--count == 0) {
